@@ -11,7 +11,7 @@ Advance Convolutions, Attention and Image Augmentation: Depthwise, Pixel Shuffle
 
 ## Final Notebook
 
-The final notebook is [here](https://github.com/pankaja0285/era_v1_session9_pankaja/blob/main/CIFAR10_Image_Classification.ipynb) and code for individual experiments for each advanced convolutions can be found [here](https://github.com/pankaja0285/era_v1_session9_pankajatree/main/experiments) 
+The final notebook is [here](https://github.com/pankaja0285/era_v1_session9_pankaja/blob/main/CiFAR_S9.ipynb) and code for individual experiments for each advanced convolutions can be found [here](https://github.com/pankaja0285/era_v1_session9_pankajatree/main/experiments) 
 
 Epochs - 90 <br>
 Dropout - 0.01 <br>
