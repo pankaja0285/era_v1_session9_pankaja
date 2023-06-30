@@ -1,11 +1,10 @@
 
 import torch.nn as nn
 import torch.nn.functional as F
-from zmq.constants import XPUB_MANUAL
 
 
 class Net2(nn.Module):
-    def __init__(self,dropout):
+    def __init__(self, dropout):
         super(Net2, self).__init__()
         
         ## Convolution Block1
@@ -26,8 +25,7 @@ class Net2(nn.Module):
         #     nn.Conv2d(64, 32,1, stride=2), # Input: 32x32x64 | Output: 16x16x32 | RF: 5x5
         #     nn.ReLU(),
         # )
-
-        ## Transition Block1 - per assignment - doesn't change the rf i.e. r_out
+        ## Transition Block1
         self.trans1 = nn.Sequential(
             nn.Conv2d(64, 32,1, dilation=2), # Input: 32x32x64 | Output: 16x16x32 | RF: 5x5
             nn.ReLU(),
@@ -41,7 +39,7 @@ class Net2(nn.Module):
             nn.Dropout2d(dropout),
 
             ## Depthwise Seperable Convolution1
-            nn.Conv2d(32, 32, 3,  padding=1, groups=32, bias = False),  # Input: 16x16x32 | Output: 16x16x32 | RF: 13x13
+            nn.Conv2d(32,32, 3,  padding=1,groups=32 ,bias = False),  # Input: 16x16x32 | Output: 16x16x32 | RF: 13x13
             nn.Conv2d(32, 64, 1, padding=1, bias = False),   # Input: 16x16x32 | Output: 18x18x64 | RF: 13x13
             nn.ReLU(),
             nn.BatchNorm2d(64),
@@ -59,7 +57,7 @@ class Net2(nn.Module):
         self.conv3 = nn.Sequential(
             
             ## Dilation Block
-            nn.Conv2d(32, 64, 3,  padding=1, bias = False, dilation=2), # Input: 9x9x64 | Output: 7x7x64 | RF: 29x29
+            nn.Conv2d(32, 64, 3,  padding=1, bias = False,dilation=2), # Input: 9x9x64 | Output: 7x7x64 | RF: 29x29
             nn.ReLU(),
             nn.BatchNorm2d(64),
             nn.Dropout2d(dropout),
@@ -85,34 +83,21 @@ class Net2(nn.Module):
             nn.Dropout2d(dropout),
 
             ## Depthwise seperable Convolution2
-            nn.Conv2d(32, 32, 3,  padding=1, groups=32, bias = False),# Input: 4x4x16 | Output: 4x4x32 | RF: 125x125
-            # nn.Conv2d(32, 10, 1, padding=1, bias = False),          # Input: 4x4x32| Output: 6x6x10 | RF: 125x125
-            nn.ReLU(),
-            nn.BatchNorm2d(32),
-            nn.Dropout2d(dropout),
-        )
-
-        ## Gap
-        self.gap = nn.Sequential(
-            nn.AvgPool2d(kernel_size=4)
-        )
-
-        self.conv5 = nn.Sequential(
-            nn.Conv2d(32, 32, 1, padding=1, bias = False), 
+            nn.Conv2d(32, 32, 3,  padding=1,groups=32 ,bias = False),# Input: 4x4x16 | Output: 4x4x32 | RF: 125x125
+            nn.Conv2d(32, 10, 1, padding=1, bias = False),          # Input: 4x4x32| Output: 6x6x10 | RF: 125x125
             nn.ReLU(),
             nn.BatchNorm2d(10),
             nn.Dropout2d(dropout),
         )
 
-        # FC
-        self.fc_layer = nn.Sequential(
-            # nn.Dropout(p=0.1),
-            nn.Linear(1024, 512),
-            nn.ReLU(inplace=True),
-            nn.Dropout(p=0.1),
-            nn.Linear(512, 32)
+        ## Output Block
+        self.gap = nn.Sequential(
+            nn.AdaptiveAvgPool2d(1)
         ) 
-
+        self.fc1 = nn.Sequential(
+            nn.Linear(10,10)
+        )
+        
 
     def forward(self, x):
         x = self.conv1(x)
@@ -126,11 +111,9 @@ class Net2(nn.Module):
 
         x = self.conv4(x)
         x = self.gap(x)
-        x = self.conv5(x)
-
-        # flatten
-        x = x.view(x.size(0), -1)
-        
-        # fc layer
-        x = self.fc_layer(x)
-        return F.log_softmax(x, dim=1)
+        print(f"x: {x.shape}")
+        x = x.view(-1,10)
+        print(f"x: {x.shape}")
+        x = F.relu(self.fc1(x))
+        print(f"x: {x.shape}")
+        return F.log_softmax(x,dim=1)

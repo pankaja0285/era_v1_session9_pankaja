@@ -2,8 +2,11 @@ model: cifar10
 model_params:
     experiment_name: era_v1_s9_cifar_dilated
     model_dir: ./models/
+    model_for: gap
+    model_name: model_gap
     seed: 1
     dropout: 0.01
+    save_model: Y
 data_loader:
     type: CIFAR10DataLoader
     classes: ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']

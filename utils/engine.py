@@ -4,7 +4,7 @@ import torch
 import torch.optim as optim
 import matplotlib.pyplot as plt
 from torch.optim.lr_scheduler import StepLR,OneCycleLR
-from models import model as m
+from models import *
 from utils import train as trn
 from utils import test as tst
 from torchsummary import summary
@@ -29,7 +29,7 @@ class TriggerEngine:
         return device
         
     def run_experiment(self):
-            
+        curr_model = None
         dropout=self.config['model_params']['dropout']
         epochs=self.config['training_params']['epochs']
         l2_factor = self.config['training_params']['l2_factor']
@@ -48,27 +48,39 @@ class TriggerEngine:
         lrs=[]
             
         #device = self.set_device()
-            
-        model = m.Net(dropout).to(self.device)
+        
+        model_for = self.config['model_params'] ['model_for']
+        model_name = self.config['model_params'] ['model_name'] 
+        
+        if model_for == 'gap':
+            curr_model = model.Net(dropout).to(self.device)
+        else:
+            curr_model = model_fc.Net2(dropout).to(self.device)
+        
+        print(f"Running experiment with '{model_name}' model...") 
         # optimizer = optim.SGD(model.parameters(), lr=0.02, momentum=0.7,weight_decay=l2_factor)
-        optimizer = opt_func(model.parameters(), lr=lr, weight_decay=l2_factor)
+        optimizer = opt_func(curr_model.parameters(), lr=lr, weight_decay=l2_factor)
         #scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=3, verbose=True,mode='max')
-        scheduler = OneCycleLR(optimizer, max_lr=lr,epochs=epochs,steps_per_epoch=len(self.dataset.train_loader))
+        scheduler = OneCycleLR(optimizer, max_lr=lr, epochs=epochs, steps_per_epoch=len(self.dataset.train_loader))
 
         for epoch in range(1, epochs + 1):
             print(f'Epoch {epoch}:')
-            trn.train(model, self.device, self.dataset.train_loader, optimizer,epoch, train_accuracy, train_losses, l1_factor,scheduler,criterion,lrs,grad_clip)
+            trn.train(curr_model, self.device, self.dataset.train_loader, optimizer,epoch, train_accuracy, train_losses, l1_factor,scheduler,criterion,lrs,grad_clip)
 
-            tst.test(model, self.device, self.dataset.test_loader,test_accuracy,test_losses,criterion)
+            tst.test(curr_model, self.device, self.dataset.test_loader,test_accuracy,test_losses,criterion)
             # if epoch > 20:
             #     scheduler.step(test_accuracy[-1])
 
         
-        return (train_accuracy,train_losses,test_accuracy,test_losses),model
+        return (train_accuracy, train_losses, test_accuracy, test_losses), curr_model
         
-    def save_experiment(self,model, experiment_name):
-        print(f"Saving the model for {experiment_name}")
-        torch.save(model, './saved_models/{}.pt'.format(experiment_name))
+    def save_experiment(self, model, experiment_name):
+        save_model = config['model_params']['save_model']
+        if save_model == "Y":
+            print(f"Saving the model for {experiment_name}")
+            torch.save(model, './saved_models/{}.pt'.format(experiment_name))
+        else:
+            print(f"Model is not saved as the config setting 'save_model' is set to: {save_model}")
     
     def model_summary(self,model, input_size):
         result = summary(model, input_size=input_size)
