@@ -111,9 +111,9 @@ class Net2(nn.Module):
 
         x = self.conv4(x)
         x = self.gap(x)
-        print(f"x: {x.shape}")
+        # print(f"x: {x.shape}")
         x = x.view(-1,10)
-        print(f"x: {x.shape}")
+        # print(f"x: {x.shape}")
         x = F.relu(self.fc1(x))
-        print(f"x: {x.shape}")
+        # print(f"x: {x.shape}")
         return F.log_softmax(x,dim=1)

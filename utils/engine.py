@@ -1,3 +1,4 @@
+import os
 import torchvision
 from dataloader.load_data import Cifar10DataLoader
 import torch
@@ -75,16 +76,17 @@ class TriggerEngine:
         return (train_accuracy, train_losses, test_accuracy, test_losses), curr_model
         
     def save_experiment(self, model, experiment_name):
-        save_model = config['model_params']['save_model']
+        save_model = self.config['model_params']['save_model']
+        save_model_dir = ""
         if save_model == "Y":
-            save_model_dir = config['model_params']['save_model_dir']
+            save_model_dir = self.config['model_params']['save_model_dir']
             if not os.path.exists(save_model_dir):
                os.mkdir(save_model_dir, mode = 0o777) 
             print(f"Saving the model for {experiment_name}")
             # torch.save(model, './saved_models/{}.pt'.format(experiment_name))
-            torch.save(model, '{save_model_dir}{}.pt'.format(experiment_name))
+            torch.save(model, f'{save_model_dir}{experiment_name}.pt')
         else:
-            print(f"Model is not saved as the config setting 'save_model' is set to: {save_model}")
+            print(f"Model is not saved, as the config setting 'save_model' is set to: {save_model}")
     
     def model_summary(self,model, input_size):
         result = summary(model, input_size=input_size)
