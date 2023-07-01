@@ -77,8 +77,12 @@ class TriggerEngine:
     def save_experiment(self, model, experiment_name):
         save_model = config['model_params']['save_model']
         if save_model == "Y":
+            save_model_dir = config['model_params']['save_model_dir']
+            if not os.path.exists(save_model_dir):
+               os.mkdir(save_model_dir, mode = 0o777) 
             print(f"Saving the model for {experiment_name}")
-            torch.save(model, './saved_models/{}.pt'.format(experiment_name))
+            # torch.save(model, './saved_models/{}.pt'.format(experiment_name))
+            torch.save(model, '{save_model_dir}{}.pt'.format(experiment_name))
         else:
             print(f"Model is not saved as the config setting 'save_model' is set to: {save_model}")
     

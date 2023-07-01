@@ -7,6 +7,7 @@ model_params:
     seed: 1
     dropout: 0.01
     save_model: Y
+    save_model_dir: ./saved_models/
 data_loader:
     type: CIFAR10DataLoader
     classes: ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
